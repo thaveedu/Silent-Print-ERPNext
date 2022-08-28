@@ -1,6 +1,6 @@
 // How to extend page function: https://discuss.erpnext.com/t/pos-custom-script-in-point-of-sale/29554/15
-frappe.require('assets/js/point-of-sale.min.js', function() {
-    erpnext.PointOfSale.PastOrderSummary.prototype.print_receipt =  function(parent) {
+frappe.require('assets/js/point-of-sale.min.js', function () {
+    erpnext.PointOfSale.PastOrderSummary.prototype.print_receipt = function (parent) {
         const frm = this.events.get_frm();
         var printService = new frappe.silent_print.WebSocketPrinter();
         frappe.call({
@@ -11,7 +11,7 @@ frappe.require('assets/js/point-of-sale.min.js', function() {
                 silent_print_format: frm.pos_print_format,
             },
             callback: (r) => {
-                if(r.message){
+                if (r.message) {
                     printService.submit({
                         'type': r.message.print_type,
                         'url': 'file.pdf',
@@ -32,9 +32,9 @@ frappe.require('assets/js/point-of-sale.min.js', function() {
     }
 })
 
-$(document).on('app_ready', function () {    
+$(document).on('app_ready', function () {
 
-    frappe.setMasterTab = function(){
+    frappe.setMasterTab = function () {
         frappe.call({
             method: "silent_print.utils.print_format.set_master_tab",
             args: {
@@ -49,40 +49,40 @@ $(document).on('app_ready', function () {
         $(".navbar-brand.navbar-home").before('<div id="navbar-printer" class="navbar-center ellipsis" style="color: red; margin-right: 5px;"><i class="fa fa-print" onclick="frappe.setMasterTab()"></i></div>')
     }, 100);
 
-    frappe.realtime.on("update_master_tab", function(data) {
+    frappe.realtime.on("update_master_tab", function (data) {
         console.log("update_master_tab", data);
-        if (Number(data.tab_id) == Number(window.tab_id)){
+        if (Number(data.tab_id) == Number(window.tab_id)) {
             $("#navbar-printer").css("color", "green")
-        }else{
+        } else {
             $("#navbar-printer").css("color", "red")
         }
     })
 
-    if (window.sessionStorage.tab_id){
+    if (window.sessionStorage.tab_id) {
         window.tab_id = window.sessionStorage.tab_id;
         window.sessionStorage.removeItem("tab_id");
-    }else{
+    } else {
         window.tab_id = Math.floor(Math.random() * 1000000);
     }
 
-    $(document).ready(function() {
-        
+    $(document).ready(function () {
+
         localStorage.setItem("is_printing", 0)
 
-        window.addEventListener("beforeunload", function (e){
+        window.addEventListener("beforeunload", function (e) {
             window.sessionStorage.tab_id = window.tab_id;
-    
+
             return null;
         });
 
     })
 
     //TODO: this is a way to avoid the problem that for every tab o windows openned with the system the print order is send. This is not ideal.
-    frappe.realtime.on("print-silently", function(data) {
+    frappe.realtime.on("print-silently", function (data) {
         console.log("tab_id", Number(data.tab_id), Number(window.tab_id), Number(data.tab_id) === Number(window.tab_id));
         console.log(data);
-        if (Number(data.tab_id) == Number(window.tab_id)){
-            
+        if (Number(data.tab_id) == Number(window.tab_id)) {
+
             printService.submit({
                 'type': data.print_type,
                 'url': 'file.pdf',
@@ -122,10 +122,10 @@ frappe.silent_print.WebSocketPrinter = function (options) {
         settings.onDisconnect();
         reconnect();
     };
-    
+
     var onError = function () {
-        if (frappe.whb == undefined){
-            frappe.msgprint("No se pudo establecer conexión con la impresora. Favor verificar que el <a href='https://github.com/imTigger/webapp-hardware-bridge' target='_blank'>WebApp Hardware Bridge</a> esté ejecutándose.")
+        if (frappe.whb == undefined) {
+            console.log("No se pudo establecer conexión con la impresora. Favor verificar que el <a href='https://github.com/imTigger/webapp-hardware-bridge' target='_blank'>WebApp Hardware Bridge</a> esté ejecutándose.")
             frappe.whb = true
         }
     };
